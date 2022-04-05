@@ -1,5 +1,9 @@
 def play(game, player):
     print("Human Play")
     print(game)
-    x, y = list(map(int, input().split()))
+    try:
+        x, y = list(map(int, input().split()))
+    except:
+        print("Invalid input")
+        return play(game, player)
     return x, y
