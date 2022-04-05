@@ -85,16 +85,20 @@ def ucs(
     heapq.heapify(pq)
 
     # Init visited
-    visited = set(pq)
+    visited: Set[Position] = set()
 
     while len(pq) > 0:
         cost, current = heapq.heappop(pq)
         if current in end_positions:
             return cost
+
+        if current in visited:
+            continue
+        visited.add(current)
+
         for ady in game.neighbour(*current):
             if ady in visited or game[ady] not in {EMPTY, player}:
                 continue
-            visited.add(ady)
             new_cost = cost + (1 if game[ady] == EMPTY else 0)
             heapq.heappush(pq, (new_cost, ady))
 
