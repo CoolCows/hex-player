@@ -4,10 +4,9 @@ from importlib import import_module as load
 SIZE = 4  # Size of the board
 
 PLAYERS = [
-    # "random_player",
-    # "rush_player",
-    "minimax_player",
-    # "minimax_player",
+    "random_player",
+    "rush_player",
+    "coolcow_player",
     # "human_player",
 ]
 
@@ -101,4 +100,3 @@ def tourney():
 
 if __name__ == "__main__":
     tourney()
-
