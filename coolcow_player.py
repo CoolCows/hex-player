@@ -5,10 +5,12 @@
 # 				the game.
 
 from __future__ import annotations
-from typing import Set, Tuple
+from typing import List, Set, Tuple
 from game_logic import *
 from coolcow_minimax import minimax
 from dataclasses import dataclass
+import heapq
+
 
 # Type Synonims
 Position = Tuple[int, int]
@@ -38,7 +40,8 @@ Position = Tuple[int, int]
 
 
 def play(game, player):
-    return minimax(game, player, 3, heuristic, moves)
+    depth = 3
+    return minimax(game, player, depth, heuristic, moves)
 
 
 def moves(game, player):
@@ -49,129 +52,54 @@ def moves(game, player):
 
 
 def heuristic(game: Game, player: str) -> int:
-    h1 = most_sparsed(game, player)
-    h2 = block_adversary(game, player)
-    return max(0, h2)
+    # h1 = most_sparsed(game, player)
+    # h2 = block_adversary(game, player)
+    h3 = shortest_path(game, player)
+    return max(0, h3)
 
 
-def block_adversary(game: Game, player: str) -> int:
-    unblocked = 2 * game.size
-    n = game.size - 1
-    for i in range(game.size):
-        if player == "W":
-            if game[0, i] == "W":
-                unblocked -= 1
-            if game[n, i] == "W":
-                unblocked -= 1
-        else:
-            if game[i, 0] == "B":
-                unblocked -= 1
-            if game[i, n] == "B":
-                unblocked -= 1
-    # print("###")
-    # print(game)
-    # print(unblocked)
-    return unblocked * 10
+def shortest_path(game: Game, player: str) -> int:
+    n = game.size
+    white_starting_points = set((i, 0) for i in range(n) if game[i, 0] != BLACK)
+    white_end_points = set((i, n - 1) for i in range(n) if game[i, n - 1] != BLACK)
+    black_starting_points = set((0, i) for i in range(n) if game[0, i] != WHITE)
+    black_end_points = set((n - 1, i) for i in range(n) if game[n - 1, i] != WHITE)
 
+    shortest_white = ucs(game, WHITE, white_starting_points, white_end_points)
+    shortest_black = ucs(game, BLACK, black_starting_points, black_end_points)
 
-def most_sparsed(game: Game, player: str) -> int:
-    global_borders = Borders(*[(-1, -1) for _ in range(4)])
-    get_bigger = (
-        lambda border1, border2: border1.bigger_vertical_border(border2)
+    hval = (
+        shortest_black - shortest_white
         if player == WHITE
-        else border1.bigger_horizontal_border(border2)
+        else shortest_white - shortest_black
     )
-    visited = set()
-    empty_area = set()
-    for x in range(game.size):
-        for y in range(game.size):
-            if game[x, y] == player and (x, y) not in visited:
-                visited.add((x, y))
-                borders = Borders(*[(x, y) for _ in range(4)])
-                dfs(game, player, (x, y), visited, empty_area, borders)
-                global_borders = (
-                    get_bigger(global_borders, borders)
-                    if global_borders.valid
-                    else borders
-                )
-
-    area_covered = (
-        global_borders.bottom[1] - global_borders.top[1]
-        if player == WHITE
-        else global_borders.right[0] - global_borders.left[0]
-    )
-    return area_covered * 100 + len(empty_area)
+    return hval
 
 
-# Auxiliar
-def dfs(
+def ucs(
     game: Game,
     player: str,
-    current: Position,
-    visited: Set[Position],
-    empty_area: Set[Position],
-    borders: Borders,
-) -> None:
-    for ady in game.neighbour(*current):
-        if game[ady] in {player, EMPTY}:
-            empty_area.add(ady)
-        if ady in visited:
-            continue
-        visited.add(ady)
-        borders.update_borders(ady)
-        dfs(game, player, ady, visited, empty_area, borders)
+    start_positions: Set[Position],
+    end_positions: Set[Position],
+) -> int:
+    # Init Priority Queue
+    pq: List[Tuple[int, Position]] = [
+        (0 if game[st_pos] == player else 1, st_pos) for st_pos in start_positions
+    ]
+    heapq.heapify(pq)
 
+    # Init visited
+    visited = set(pq)
 
-@dataclass
-class Borders:
-    left: Position
-    right: Position
-    top: Position
-    bottom: Position
+    while len(pq) > 0:
+        cost, current = heapq.heappop(pq)
+        if current in end_positions:
+            return cost
+        for ady in game.neighbour(*current):
+            if ady in visited or game[ady] not in {EMPTY, player}:
+                continue
+            visited.add(ady)
+            new_cost = cost + (1 if game[ady] == EMPTY else 0)
+            heapq.heappush(pq, (new_cost, ady))
 
-    @property
-    def valid(self):
-        return (
-            self.left[0] != -1
-            and self.right[0] != -1
-            and self.top[1] != -1
-            and self.bottom[1] != -1
-        )
-
-    def update_borders(self, position: Position):
-        if position[0] < self.left[0]:
-            self.left = position
-        if position[0] > self.right[0]:
-            self.right = position
-        if position[1] < self.top[1]:
-            self.top = position
-        if position[1] > self.bottom[1]:
-            self.bottom = position
-
-    def bigger_border(self, other_border: Borders):
-        if self.left[0] < other_border.left[0]:
-            return self
-        if self.right[0] > other_border.right[0]:
-            return self
-        if self.top[1] < other_border.top[1]:
-            return self
-        if self.bottom[1] > other_border.bottom[1]:
-            return self
-        return other_border
-
-    def bigger_horizontal_border(self, other_border: Borders):
-        self_size = self.right[0] - self.left[0]
-        other_size = other_border.right[0] - other_border.left[0]
-        if self_size >= other_size:
-            return self
-        return other_border
-
-    def bigger_vertical_border(self, other_border: Borders):
-        self_size = self.bottom[1] - self.top[1]
-        other_size = other_border.bottom[1] - other_border.top[1]
-        if self_size >= other_size:
-            return self
-        return other_border
-
-    def __str__(self) -> str:
-        return f"{self.left} {self.right} {self.top} {self.bottom}"
+    return game.size ** 2
