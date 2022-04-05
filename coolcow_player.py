@@ -8,7 +8,6 @@ from __future__ import annotations
 from typing import List, Set, Tuple
 from game_logic import *
 from coolcow_minimax import minimax
-from dataclasses import dataclass
 import heapq
 
 
