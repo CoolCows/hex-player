@@ -7,7 +7,7 @@
 from __future__ import annotations
 from typing import Set, Tuple
 from game_logic import *
-from minimax import minimax
+from coolcow_minimax import minimax
 from dataclasses import dataclass
 
 # Type Synonims
@@ -38,9 +38,6 @@ Position = Tuple[int, int]
 
 
 def play(game, player):
-    # Code Here
-    # Random player implementation (just delete it)
-
     return minimax(game, player, 3, heuristic, moves)
 
 
@@ -52,11 +49,32 @@ def moves(game, player):
 
 
 def heuristic(game: Game, player: str) -> int:
-    hval = most_sparsed(game, player)
-    return max(0, hval)
+    h1 = most_sparsed(game, player)
+    h2 = block_adversary(game, player)
+    return max(0, h2)
 
 
-def most_sparsed(game: Game, player: str):
+def block_adversary(game: Game, player: str) -> int:
+    unblocked = 2 * game.size
+    n = game.size - 1
+    for i in range(game.size):
+        if player == "W":
+            if game[0, i] == "W":
+                unblocked -= 1
+            if game[n, i] == "W":
+                unblocked -= 1
+        else:
+            if game[i, 0] == "B":
+                unblocked -= 1
+            if game[i, n] == "B":
+                unblocked -= 1
+    # print("###")
+    # print(game)
+    # print(unblocked)
+    return unblocked * 10
+
+
+def most_sparsed(game: Game, player: str) -> int:
     global_borders = Borders(*[(-1, -1) for _ in range(4)])
     get_bigger = (
         lambda border1, border2: border1.bigger_vertical_border(border2)
@@ -77,21 +95,15 @@ def most_sparsed(game: Game, player: str):
                     else borders
                 )
 
-    # print("######")
-    # print(player)
-    # if player == WHITE:
-    # print(global_borders)
-    # print(game)
-
     area_covered = (
         global_borders.bottom[1] - global_borders.top[1]
         if player == WHITE
         else global_borders.right[0] - global_borders.left[0]
     )
+    return area_covered * 100 + len(empty_area)
 
-    return area_covered * 100 - len(empty_area)
 
-
+# Auxiliar
 def dfs(
     game: Game,
     player: str,
