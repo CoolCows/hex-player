@@ -1,9 +1,10 @@
 # -*- coding: utf8 -*-
 
-__author__ = 'Suilan Estévez Velarde'
+__author__ = "Suilan Estévez Velarde"
 
 from tools import oo
 from game_logic import *
+
 
 def minimax(game, player, depth, h, moves):
     """Retorna el mejor tablero para el jugador
@@ -11,6 +12,7 @@ def minimax(game, player, depth, h, moves):
     """
     best, value = maxplay(game, None, player, depth, h, moves)
     return best
+
 
 def maxplay(game, play, player, depth, h, moves):
     """Retorna la mejor jugada tablero para el jugador"""
@@ -23,14 +25,15 @@ def maxplay(game, play, player, depth, h, moves):
     if not depth:
         return play, h(game, player)
 
-    for x,y in moves(game, player):
-        b, value = minplay(game.clone_play(x,y), (x,y), player, depth - 1, h, moves)
+    for x, y in moves(game, player):
+        b, value = minplay(game.clone_play(x, y), (x, y), player, depth - 1, h, moves)
 
         if value > best_value:
-            best = (x,y)
+            best = (x, y)
             best_value = value
 
     return best, best_value
+
 
 def minplay(game, play, player, depth, h, moves):
     """Retorna la mejor jugada para el jugador contrario"""
@@ -43,11 +46,12 @@ def minplay(game, play, player, depth, h, moves):
     if not depth:
         return play, h(game, player)
 
-    for x,y in moves(game, player):
-        _, value = maxplay(game.clone_play(x,y), (x,y), player, depth - 1, h, moves)
+    for x, y in moves(game, player):
+        _, value = maxplay(game.clone_play(x, y), (x, y), player, depth - 1, h, moves)
 
         if value < best_value:
-            best = (x,y)
+            best = (x, y)
             best_value = value
 
     return best, best_value
+
