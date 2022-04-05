@@ -51,10 +51,7 @@ def moves(game, player):
 
 
 def heuristic(game: Game, player: str) -> int:
-    # h1 = most_sparsed(game, player)
-    # h2 = block_adversary(game, player)
-    h3 = shortest_path(game, player)
-    return max(0, h3)
+    return max(0, shortest_path(game, player))
 
 
 def shortest_path(game: Game, player: str) -> int:
