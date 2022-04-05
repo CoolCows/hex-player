@@ -4,9 +4,13 @@ _Rodrigo Pino_
 _Adrian Portales_
 _C512_
 
-Jugador de Hex utilizando Minimax
+Jugador de Hex utilizando Minimax y Alpha-Beta Prunning
 
 ## Implementación
+
+_Heurística implementada en coolcow_player.py_
+
+_Alpha-Beta Prunning implementado en coolcow_minimax.py_
 
 ### Juego
 
