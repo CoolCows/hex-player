@@ -14,7 +14,7 @@ def minimax(game, player, depth, h, moves):
     return best
 
 
-def maxplay(game, play, player, depth, h, moves):
+def maxplay(game, play, player, depth, h, moves, alpha=-oo, beta=oo):
     """Retorna la mejor jugada tablero para el jugador"""
     best = None
     best_value = -oo
@@ -26,7 +26,13 @@ def maxplay(game, play, player, depth, h, moves):
         return play, h(game, player)
 
     for x, y in moves(game, player):
-        b, value = minplay(game.clone_play(x, y), (x, y), player, depth - 1, h, moves)
+        _, value = minplay(
+            game.clone_play(x, y), (x, y), player, depth - 1, h, moves, alpha, beta
+        )
+        alpha = max(alpha, value)
+        if value >= beta:
+            # print(f"cutting max {value} {alpha}")
+            break
 
         if value > best_value:
             best = (x, y)
@@ -35,7 +41,7 @@ def maxplay(game, play, player, depth, h, moves):
     return best, best_value
 
 
-def minplay(game, play, player, depth, h, moves):
+def minplay(game, play, player, depth, h, moves, alpha, beta):
     """Retorna la mejor jugada para el jugador contrario"""
     best = None
     best_value = oo
@@ -47,11 +53,16 @@ def minplay(game, play, player, depth, h, moves):
         return play, h(game, player)
 
     for x, y in moves(game, player):
-        _, value = maxplay(game.clone_play(x, y), (x, y), player, depth - 1, h, moves)
+        _, value = maxplay(
+            game.clone_play(x, y), (x, y), player, depth - 1, h, moves, alpha, beta
+        )
+        beta = min(beta, value)
+        if value <= alpha:
+            # print(f"cutting min {value} {alpha}")
+            break
 
         if value < best_value:
             best = (x, y)
             best_value = value
 
     return best, best_value
-
