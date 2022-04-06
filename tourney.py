@@ -1,7 +1,7 @@
 from game_logic import *
 from importlib import import_module as load
 
-SIZE = 4  # Size of the board
+SIZE = 10  # Size of the board
 
 PLAYERS = [
     "random_player",
