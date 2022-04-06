@@ -1,6 +1,10 @@
 # Tournament log result
 log.txt
 
+# Auxiliar
+human_player.py
+pyrightconfig.json
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
