@@ -31,7 +31,6 @@ def maxplay(game, play, player, depth, h, moves, alpha=-oo, beta=oo):
         )
         alpha = max(alpha, value)
         if value >= beta:
-            # print(f"cutting max {value} {alpha}")
             break
 
         if value > best_value:
@@ -58,7 +57,6 @@ def minplay(game, play, player, depth, h, moves, alpha, beta):
         )
         beta = min(beta, value)
         if value <= alpha:
-            # print(f"cutting min {value} {alpha}")
             break
 
         if value < best_value:
